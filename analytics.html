@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情養成寵物日記 | 情緒圖表</title>
+    <meta name="description" content="查看你的歷史心情趨勢與情緒分析報告">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">🐾 心情寵物日記</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link" id="nav-home">🏠 寵物主頁</a></li>
+            <li><a href="diary.html" class="nav-link" id="nav-diary">📝 記錄日記</a></li>
+            <li><a href="analytics.html" class="nav-link active" id="nav-analytics">📈 情緒圖表</a></li>
+        </ul>
+        <div class="nav-group-badge">第 12 組</div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="page-title-block">
+            <h1>📈 情緒歷史追蹤</h1>
+            <p class="page-subtitle">你的心情記錄，你的成長軌跡</p>
+        </div>
+
+        <!-- 摘要卡片 -->
+        <div class="analytics-summary" id="analyticsSummary">
+            <div class="summary-card glass-card">
+                <div class="summary-icon">📖</div>
+                <div class="summary-body">
+                    <div class="summary-value" id="totalDiaries">0</div>
+                    <div class="summary-label">總日記篇數</div>
+                </div>
+            </div>
+            <div class="summary-card glass-card">
+                <div class="summary-icon" id="topMoodIcon">—</div>
+                <div class="summary-body">
+                    <div class="summary-value" id="topMood">—</div>
+                    <div class="summary-label">最常見心情</div>
+                </div>
+            </div>
+            <div class="summary-card glass-card">
+                <div class="summary-icon">📅</div>
+                <div class="summary-body">
+                    <div class="summary-value" id="avgMood">—</div>
+                    <div class="summary-label">平均心情指數</div>
+                </div>
+            </div>
+            <div class="summary-card glass-card">
+                <div class="summary-icon">🔥</div>
+                <div class="summary-body">
+                    <div class="summary-value" id="currentStreak">0</div>
+                    <div class="summary-label">連續記錄天數</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 趨勢折線圖 -->
+        <section class="chart-section glass-card">
+            <div class="chart-header">
+                <h2>📉 心情趨勢圖</h2>
+                <div class="chart-controls">
+                    <button class="chart-tab active" id="tab-week" data-range="7">最近 7 天</button>
+                    <button class="chart-tab" id="tab-month" data-range="30">最近 30 天</button>
+                    <button class="chart-tab" id="tab-all" data-range="-1">全部</button>
+                </div>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 心情分佈圓餅圖 + 歷史清單 -->
+        <div class="analytics-bottom">
+            <section class="chart-section glass-card">
+                <h2>🎯 心情分佈</h2>
+                <div class="pie-wrap">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </section>
+
+            <section class="history-list-section glass-card">
+                <h2>🗂️ 全部日記紀錄</h2>
+                <div id="historyList" class="history-list">
+                    <p class="empty-hint">還沒有任何日記，快去記錄吧！</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>第 12 組 ・ 心情養成寵物日記 ・ 期末專題 2026</p>
+    </footer>
+
+    <script src="db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const db = PetDB.load();
+            const diaries = db.diaries;
+
+            // 摘要
+            document.getElementById('totalDiaries').textContent = diaries.length;
+            document.getElementById('currentStreak').textContent = db.pet.streak;
+
+            if (diaries.length > 0) {
+                // 最常見心情
+                const moodCounts = {};
+                diaries.forEach(d => { moodCounts[d.mood] = (moodCounts[d.mood] || 0) + 1; });
+                const topMood = Object.entries(moodCounts).sort((a,b) => b[1]-a[1])[0][0];
+                document.getElementById('topMoodIcon').textContent = PetDB.MOOD_ICONS[topMood];
+                document.getElementById('topMood').textContent = topMood;
+
+                // 平均心情
+                const avg = (diaries.reduce((s, d) => s + d.moodVal, 0) / diaries.length).toFixed(1);
+                const avgMoodLabel = {1:'哀 😢', 2:'怒 😠', 3:'樂 😆', 4:'喜 😊'};
+                document.getElementById('avgMood').textContent = avgMoodLabel[Math.round(avg)] || avg;
+            }
+
+            // ============ 趨勢折線圖 ============
+            let currentRange = 7;
+
+            function getFilteredData(range) {
+                const sorted = [...diaries].sort((a,b) => a.timestamp - b.timestamp);
+                return range === -1 ? sorted : sorted.slice(-range);
+            }
+
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 300);
+            trendGradient.addColorStop(0, 'rgba(108, 92, 231, 0.5)');
+            trendGradient.addColorStop(1, 'rgba(108, 92, 231, 0.02)');
+
+            let trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '心情指數',
+                        data: [],
+                        borderColor: '#6C5CE7',
+                        backgroundColor: trendGradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6C5CE7',
+                        pointBorderWidth: 2.5,
+                        pointRadius: 6,
+                        pointHoverRadius: 9,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0, max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: v => ({ 1:'哀', 2:'怒', 3:'樂', 4:'喜' }[v] || ''),
+                                font: { family: 'Nunito', size: 13 }
+                            },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Nunito', size: 12 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255,255,255,0.95)',
+                            titleColor: '#2d3436', bodyColor: '#2d3436',
+                            borderColor: 'rgba(108,92,231,0.3)', borderWidth: 1, padding: 12,
+                            callbacks: {
+                                label: ctx => ' ' + ({ 1:'😢 哀', 2:'😠 怒', 3:'😆 樂', 4:'😊 喜' }[ctx.raw] || ctx.raw)
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateTrendChart(range) {
+                const data = getFilteredData(range);
+                trendChart.data.labels = data.map(d => d.date);
+                trendChart.data.datasets[0].data = data.map(d => d.moodVal);
+                trendChart.update();
+            }
+            updateTrendChart(currentRange);
+
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    updateTrendChart(parseInt(tab.dataset.range));
+                });
+            });
+
+            // ============ 圓餅圖 ============
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            const moodCounts2 = { '喜': 0, '樂': 0, '怒': 0, '哀': 0 };
+            diaries.forEach(d => { if (moodCounts2[d.mood] !== undefined) moodCounts2[d.mood]++; });
+
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['喜 😊', '樂 😆', '怒 😠', '哀 😢'],
+                    datasets: [{
+                        data: [moodCounts2['喜'], moodCounts2['樂'], moodCounts2['怒'], moodCounts2['哀']],
+                        backgroundColor: ['#6C5CE7', '#00b894', '#e17055', '#74b9ff'],
+                        borderColor: '#fff', borderWidth: 3,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Nunito', size: 13 }, padding: 16 } },
+                        tooltip: {
+                            backgroundColor: 'rgba(255,255,255,0.95)',
+                            titleColor: '#2d3436', bodyColor: '#2d3436',
+                            borderColor: 'rgba(108,92,231,0.3)', borderWidth: 1,
+                        }
+                    }
+                }
+            });
+
+            // ============ 歷史清單 ============
+            const historyEl = document.getElementById('historyList');
+            if (diaries.length === 0) {
+                historyEl.innerHTML = '<p class="empty-hint">還沒有任何日記，快去記錄吧！</p>';
+            } else {
+                historyEl.innerHTML = [...diaries].reverse().map(d => `
+                    <div class="history-item">
+                        <div class="history-mood">${PetDB.MOOD_ICONS[d.mood]}</div>
+                        <div class="history-body">
+                            <div class="history-date">${d.date} · <strong>${d.mood}</strong></div>
+                            <div class="history-text">${d.text || '（無文字內容）'}</div>
+                            ${d.photo ? `<img src="${d.photo}" class="history-photo" alt="日記照片">` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>

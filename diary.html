@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情養成寵物日記 | 記錄日記</title>
+    <meta name="description" content="記錄今日心情，為你的寵物補充能量！">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">🐾 心情寵物日記</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link" id="nav-home">🏠 寵物主頁</a></li>
+            <li><a href="diary.html" class="nav-link active" id="nav-diary">📝 記錄日記</a></li>
+            <li><a href="analytics.html" class="nav-link" id="nav-analytics">📈 情緒圖表</a></li>
+        </ul>
+        <div class="nav-group-badge">第 12 組</div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="page-title-block">
+            <h1>📝 今日心情日記</h1>
+            <p id="currentDate" class="page-subtitle"></p>
+        </div>
+
+        <div class="diary-layout">
+            <!-- 左：表單 -->
+            <section class="diary-form-section glass-card">
+                <h2>選擇今天的心情</h2>
+                <div class="mood-selector" id="moodSelector">
+                    <button class="mood-btn" data-mood="喜" data-val="4" id="mood-btn-happy">
+                        <span class="mood-icon">😊</span>
+                        <span class="mood-label">喜</span>
+                    </button>
+                    <button class="mood-btn" data-mood="樂" data-val="3" id="mood-btn-joyful">
+                        <span class="mood-icon">😆</span>
+                        <span class="mood-label">樂</span>
+                    </button>
+                    <button class="mood-btn" data-mood="怒" data-val="2" id="mood-btn-angry">
+                        <span class="mood-icon">😠</span>
+                        <span class="mood-label">怒</span>
+                    </button>
+                    <button class="mood-btn" data-mood="哀" data-val="1" id="mood-btn-sad">
+                        <span class="mood-icon">😢</span>
+                        <span class="mood-label">哀</span>
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="diaryText">寫下今天發生的事</label>
+                    <textarea id="diaryText" placeholder="今天發生了什麼事呢？開心的、難過的都可以說給小布丁聽..."></textarea>
+                    <div class="char-counter"><span id="charCount">0</span> 字</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="photoUpload">📷 上傳今日照片（選填）</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="photoUpload" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <span class="upload-icon">🖼️</span>
+                            <p>點擊或拖曳上傳照片</p>
+                        </div>
+                        <img id="previewImage" class="preview-img" src="" alt="預覽圖片" style="display:none">
+                    </div>
+                </div>
+
+                <button class="submit-btn" id="submitDiary">💾 儲存今日日記</button>
+            </section>
+
+            <!-- 右：即時回饋 -->
+            <aside class="diary-feedback-section">
+                <div class="pet-feedback glass-card">
+                    <img src="pet.png" alt="小布丁" id="feedbackPet" class="feedback-pet-img">
+                    <div class="feedback-bubble" id="feedbackBubble">
+                        選擇你今天的心情，讓我知道你過得如何！
+                    </div>
+                </div>
+
+                <div class="mood-tip glass-card" id="moodTip" style="display:none">
+                    <h3 id="tipTitle">💡 今日小提示</h3>
+                    <p id="tipContent"></p>
+                </div>
+
+                <!-- 已有日記清單 -->
+                <div class="glass-card diary-log-section">
+                    <h3>📚 過去日記</h3>
+                    <div id="diaryLog" class="diary-log-list">
+                        <p class="empty-hint">還沒有任何日記</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- 成功提示 Modal -->
+    <div class="modal-overlay" id="successModal" style="display:none">
+        <div class="modal glass-card">
+            <div class="modal-pet-img">
+                <img src="pet.png" alt="成功" id="modal-pet">
+            </div>
+            <h2>🎉 日記儲存成功！</h2>
+            <p id="modalMsg">小布丁收到你的心情了！</p>
+            <div class="modal-actions">
+                <button class="cta-btn" id="modalGoHome">回到主頁</button>
+                <button class="link-btn" id="modalClose">繼續紀錄</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>第 12 組 ・ 心情養成寵物日記 ・ 期末專題 2026</p>
+    </footer>
+
+    <script src="db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 顯示日期
+            const today = new Date();
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+            let currentMood = null;
+            let currentMoodVal = null;
+            let photoDataUrl = null;
+
+            const MOOD_TIPS = {
+                '喜': { title: '✨ 開心的一天！', content: '把這份開心也分享給身邊的人吧！小布丁看到你這麼開心，親密度大幅提升了喔！' },
+                '樂': { title: '😆 歡樂無限！', content: '快樂的情緒最有感染力！記錄下這份快樂的原因，下次心情低落時再回來看看。' },
+                '怒': { title: '😤 深呼吸一下', content: '生氣是正常的情緒。試著想想：這件事 10 年後還重要嗎？小布丁陪著你。' },
+                '哀': { title: '🥺 難過沒關係', content: '每個人都有低潮，允許自己悲傷。把心事寫下來，是療癒的第一步。' },
+            };
+
+            const FEEDBACK_MSG = {
+                '喜': '哇！你今天很開心呢！讓我也沾染一點你的好心情～😊',
+                '樂': '好快樂的你！看到你這樣我也想跳舞了！😆',
+                '怒': '嗯...先深呼吸。我在這裡陪著你喔 😤',
+                '哀': '抱抱你...把難過說出來，會好一點點的。🥺',
+            };
+
+            // 心情按鈕
+            const moodBtns = document.querySelectorAll('.mood-btn');
+            moodBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    moodBtns.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    currentMood = btn.dataset.mood;
+                    currentMoodVal = parseInt(btn.dataset.val);
+
+                    // 回饋
+                    document.getElementById('feedbackBubble').textContent = FEEDBACK_MSG[currentMood];
+                    const tip = MOOD_TIPS[currentMood];
+                    const tipEl = document.getElementById('moodTip');
+                    document.getElementById('tipTitle').textContent = tip.title;
+                    document.getElementById('tipContent').textContent = tip.content;
+                    tipEl.style.display = 'block';
+                    tipEl.style.animation = 'fadeInUp 0.4s ease';
+                });
+            });
+
+            // 字數統計
+            const diaryText = document.getElementById('diaryText');
+            diaryText.addEventListener('input', () => {
+                document.getElementById('charCount').textContent = diaryText.value.length;
+            });
+
+            // 照片上傳
+            const uploadZone = document.getElementById('uploadZone');
+            const photoInput = document.getElementById('photoUpload');
+            uploadZone.addEventListener('click', () => photoInput.click());
+            uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+            uploadZone.addEventListener('drop', e => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+                const file = e.dataTransfer.files[0];
+                if (file) handlePhoto(file);
+            });
+            photoInput.addEventListener('change', () => {
+                if (photoInput.files[0]) handlePhoto(photoInput.files[0]);
+            });
+
+            function handlePhoto(file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    photoDataUrl = e.target.result;
+                    document.getElementById('uploadPlaceholder').style.display = 'none';
+                    const preview = document.getElementById('previewImage');
+                    preview.src = photoDataUrl;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // 讀取既有日記
+            function renderDiaryLog() {
+                const db = PetDB.load();
+                const logEl = document.getElementById('diaryLog');
+                if (db.diaries.length === 0) {
+                    logEl.innerHTML = '<p class="empty-hint">還沒有任何日記</p>';
+                } else {
+                    logEl.innerHTML = db.diaries.slice().reverse().map(d => `
+                        <div class="diary-log-item">
+                            <span class="log-mood">${PetDB.MOOD_ICONS[d.mood]}</span>
+                            <div>
+                                <div class="log-date">${d.date}</div>
+                                <div class="log-text">${(d.text || '').substring(0, 40)}${(d.text || '').length > 40 ? '...' : ''}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            renderDiaryLog();
+
+            // 提交日記
+            document.getElementById('submitDiary').addEventListener('click', () => {
+                if (!currentMood) { alert('請先選擇今天的心情！'); return; }
+
+                const db = PetDB.load();
+                const newEntry = {
+                    date: today.toLocaleDateString('zh-TW'),
+                    mood: currentMood,
+                    moodVal: currentMoodVal,
+                    text: diaryText.value.trim(),
+                    photo: photoDataUrl,
+                    timestamp: Date.now()
+                };
+                db.diaries.push(newEntry);
+
+                // 更新寵物數值
+                db.pet.intimacy = Math.min(100, db.pet.intimacy + 8);
+                db.pet.exp += 20;
+                let levelUp = false;
+                if (db.pet.exp >= 100) {
+                    db.pet.level += 1;
+                    db.pet.exp -= 100;
+                    levelUp = true;
+                }
+                db.pet.streak += 1;
+
+                PetDB.save(db);
+                renderDiaryLog();
+
+                // Modal
+                const modal = document.getElementById('successModal');
+                const msg = levelUp
+                    ? `🎊 而且小布丁升到 Lv.${db.pet.level} 了！！`
+                    : `親密度增加到 ${db.pet.intimacy}/100！`;
+                document.getElementById('modalMsg').textContent = `小布丁收到你的心情了！${msg}`;
+                modal.style.display = 'flex';
+
+                // 重置表單
+                diaryText.value = '';
+                document.getElementById('charCount').textContent = '0';
+                moodBtns.forEach(b => b.classList.remove('selected'));
+                document.getElementById('moodTip').style.display = 'none';
+                document.getElementById('feedbackBubble').textContent = '選擇你今天的心情，讓我知道你過得如何！';
+                document.getElementById('uploadPlaceholder').style.display = 'flex';
+                document.getElementById('previewImage').style.display = 'none';
+                currentMood = null; currentMoodVal = null; photoDataUrl = null;
+            });
+
+            document.getElementById('modalGoHome').addEventListener('click', () => { window.location.href = 'index.html'; });
+            document.getElementById('modalClose').addEventListener('click', () => { document.getElementById('successModal').style.display = 'none'; });
+        });
+    </script>
+</body>
+</html>

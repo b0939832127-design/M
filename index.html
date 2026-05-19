@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心情養成寵物日記 | 首頁</title>
+    <meta name="description" content="心情養成寵物日記 - 透過每日心情紀錄，陪伴你的虛擬寵物一起成長！">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 導覽列 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">🐾 心情寵物日記</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link active" id="nav-home">🏠 寵物主頁</a></li>
+            <li><a href="diary.html" class="nav-link" id="nav-diary">📝 記錄日記</a></li>
+            <li><a href="analytics.html" class="nav-link" id="nav-analytics">📈 情緒圖表</a></li>
+        </ul>
+        <div class="nav-group-badge">第 12 組</div>
+    </nav>
+
+    <div class="page-wrapper">
+
+        <!-- 英雄區 -->
+        <section class="hero-section">
+            <div class="hero-text">
+                <h1>與你的小寵物<br><span class="gradient-text">一起成長</span></h1>
+                <p>每一篇日記，都是牠成長的養分。<br>紀錄心情，解鎖成就，讓你們的故事繼續。</p>
+                <a href="diary.html" class="cta-btn" id="hero-cta-btn">✍️ 立刻記錄今日心情</a>
+            </div>
+            <div class="hero-pet">
+                <div class="pet-aura"></div>
+                <div class="pet-circle">
+                    <img src="pet.png" alt="虛擬寵物小布丁" id="heroPetImage" class="hero-pet-img">
+                </div>
+                <div class="pet-speech-bubble" id="speechBubble">嗨！今天心情好嗎？</div>
+            </div>
+        </section>
+
+        <!-- 寵物數值面板 -->
+        <section class="stats-section">
+            <div class="stats-header">
+                <h2>🌟 小布丁的成長狀態</h2>
+                <span class="pet-name-tag" id="petNameTag">等級 <span id="petLevel">1</span></span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <label>經驗值</label>
+                        <div class="progress-bar">
+                            <div class="progress exp-bar" id="expBar" style="width: 20%;"></div>
+                        </div>
+                        <span class="stat-value" id="expValue">20 / 100 XP</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">💖</div>
+                    <div class="stat-info">
+                        <label>親密度</label>
+                        <div class="progress-bar">
+                            <div class="progress intimacy-bar" id="intimacyBar" style="width: 50%;"></div>
+                        </div>
+                        <span class="stat-value" id="intimacyValue">50 / 100</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <label>連續記錄天數</label>
+                        <div class="streak-count" id="streakCount">0</div>
+                        <span class="stat-value">天</span>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">📖</div>
+                    <div class="stat-info">
+                        <label>日記總篇數</label>
+                        <div class="streak-count" id="diaryCount">0</div>
+                        <span class="stat-value">篇</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 最近日記區 -->
+        <section class="recent-section glass-card">
+            <div class="recent-header">
+                <h2>📖 最近的日記</h2>
+                <a href="diary.html" class="link-btn" id="write-diary-btn">+ 新增日記</a>
+            </div>
+            <div id="recentDiaries" class="diary-preview-list">
+                <div class="empty-state">
+                    <p>還沒有任何日記喔！<br>快去記錄今天的心情吧 🐾</p>
+                    <a href="diary.html" id="empty-state-diary-btn">開始記錄</a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="app-footer">
+        <p>第 12 組 ・ 心情養成寵物日記 ・ 期末專題 2026</p>
+    </footer>
+
+    <script src="db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const db = PetDB.load();
+
+            // 更新寵物數值 UI
+            document.getElementById('petLevel').textContent = db.pet.level;
+            document.getElementById('petNameTag').innerHTML = `等級 <span id="petLevel">${db.pet.level}</span>`;
+            document.getElementById('expBar').style.width = db.pet.exp + '%';
+            document.getElementById('expValue').textContent = `${db.pet.exp} / 100 XP`;
+            document.getElementById('intimacyBar').style.width = db.pet.intimacy + '%';
+            document.getElementById('intimacyValue').textContent = `${db.pet.intimacy} / 100`;
+            document.getElementById('streakCount').textContent = db.pet.streak;
+            document.getElementById('diaryCount').textContent = db.diaries.length;
+
+            // 動態語言泡泡
+            const moodMessages = {
+                '喜': '今天你心情不錯呢！謝謝你陪著我😊',
+                '樂': '哇！感受到你的快樂了！一起跳舞吧！😆',
+                '怒': '發生什麼不開心的事嗎？我在這裡陪你😤',
+                '哀': '難過的時候也要記得我喔…抱抱🥺',
+            };
+            const lastDiary = db.diaries[db.diaries.length - 1];
+            if (lastDiary) {
+                document.getElementById('speechBubble').textContent = moodMessages[lastDiary.mood] || '嗨！今天心情好嗎？';
+            }
+
+            // 最近日記
+            const container = document.getElementById('recentDiaries');
+            if (db.diaries.length > 0) {
+                const recent = db.diaries.slice(-3).reverse();
+                container.innerHTML = recent.map(d => `
+                    <div class="diary-preview-item">
+                        <div class="diary-preview-mood">${PetDB.MOOD_ICONS[d.mood]}</div>
+                        <div class="diary-preview-body">
+                            <div class="diary-preview-date">${d.date}</div>
+                            <div class="diary-preview-text">${d.text || '（沒有文字內容）'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>

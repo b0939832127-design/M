@@ -1,0 +1,859 @@
+/* ============================================
+   心情養成寵物日記 — 共用樣式系統
+   第 12 組 期末專題 2026
+============================================ */
+
+/* ---- 設計 Token ---- */
+:root {
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --primary-dark: #5145c0;
+    --accent-green: #00b894;
+    --accent-red: #e17055;
+    --accent-blue: #74b9ff;
+    --bg-color: #f0f0f7;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    --text-main: #2d3436;
+    --text-muted: #636e72;
+    --text-light: #b2bec3;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+    --navbar-height: 64px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- Reset & Base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(108, 92, 231, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(162, 155, 254, 0.12) 0%, transparent 50%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+h1, h2, h3 { line-height: 1.3; }
+
+a { text-decoration: none; color: inherit; }
+
+/* ============================================
+   導覽列
+============================================ */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 2px 20px rgba(108, 92, 231, 0.08);
+}
+
+.nav-brand {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 6px;
+}
+
+.nav-link {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    background: rgba(108, 92, 231, 0.08);
+}
+
+.nav-link.active {
+    color: white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+}
+
+.nav-group-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(108, 92, 231, 0.1);
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+/* ============================================
+   版面骨架
+============================================ */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.page-title-block {
+    text-align: center;
+    padding: 20px 0 8px;
+}
+
+.page-title-block h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 6px;
+}
+
+/* ============================================
+   Glass Card
+============================================ */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition);
+}
+
+.glass-card:hover {
+    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.14);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   首頁 — 英雄區
+============================================ */
+.hero-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    padding: 48px 0;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-text p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.35);
+    transition: var(--transition);
+    font-family: inherit;
+    text-decoration: none;
+}
+
+.cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(108, 92, 231, 0.5);
+}
+
+.cta-btn:active { transform: translateY(1px); }
+
+.hero-pet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.pet-aura {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(108, 92, 231, 0.15) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse-aura 3s ease-in-out infinite;
+}
+
+@keyframes pulse-aura {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.5; }
+}
+
+.pet-circle {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 60px rgba(108, 92, 231, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.hero-pet-img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+}
+
+.pet-speech-bubble {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    position: relative;
+    max-width: 260px;
+    text-align: center;
+    z-index: 1;
+}
+
+.pet-speech-bubble::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: white;
+}
+
+/* ============================================
+   首頁 — 數值面板
+============================================ */
+.stats-section { display: flex; flex-direction: column; gap: 16px; }
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stats-header h2 { margin: 0; border-bottom: none; }
+
+.pet-name-tag {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.stat-card {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.stat-icon { font-size: 2rem; }
+
+.stat-info { flex: 1; }
+
+.stat-info label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+.streak-count {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+/* 進度條 */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.exp-bar { background: linear-gradient(90deg, #74ebd5, #9face6); }
+.intimacy-bar { background: linear-gradient(90deg, #ff9a9e, #fecfef); }
+
+/* ============================================
+   首頁 — 最近日記
+============================================ */
+.recent-section { padding: 24px; }
+
+.recent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.link-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    font-family: inherit;
+}
+
+.link-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    line-height: 2;
+}
+
+.empty-state a {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.diary-preview-list { display: flex; flex-direction: column; gap: 12px; }
+
+.diary-preview-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: var(--transition);
+}
+
+.diary-preview-item:hover { background: rgba(255, 255, 255, 0.8); }
+
+.diary-preview-mood { font-size: 2rem; }
+
+.diary-preview-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+
+.diary-preview-text { font-size: 0.95rem; color: var(--text-main); margin-top: 2px; }
+
+/* ============================================
+   日記頁 — 版面
+============================================ */
+.diary-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+}
+
+.diary-form-section { padding: 28px; }
+
+.diary-form-section h2 {
+    font-size: 1.2rem;
+    color: var(--text-main);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(108, 92, 231, 0.15);
+}
+
+/* 心情選擇 */
+.mood-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.mood-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 8px;
+    border: 2px solid rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.mood-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(108, 92, 231, 0.2);
+}
+
+.mood-btn.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.35);
+}
+
+.mood-icon { font-size: 2rem; }
+
+.mood-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.mood-btn.selected .mood-label { color: white; }
+
+/* 表單 */
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    padding: 14px;
+    border: 1.5px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.6);
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    transition: var(--transition);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+textarea:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+/* 上傳區 */
+.upload-zone {
+    border: 2px dashed rgba(108, 92, 231, 0.3);
+    border-radius: var(--radius-md);
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--primary);
+    background: rgba(108, 92, 231, 0.05);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    padding: 20px;
+}
+
+.upload-icon { font-size: 2rem; }
+.upload-placeholder p { font-size: 0.9rem; }
+
+.preview-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+/* 提交按鈕 */
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.35);
+    transition: var(--transition);
+    margin-top: 8px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5);
+}
+
+/* 右側回饋 */
+.diary-feedback-section { display: flex; flex-direction: column; gap: 16px; }
+
+.pet-feedback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    gap: 16px;
+    text-align: center;
+}
+
+.feedback-pet-img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    animation: float 3s ease-in-out infinite;
+}
+
+.feedback-bubble {
+    background: rgba(108, 92, 231, 0.08);
+    border-left: 4px solid var(--primary);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-weight: 600;
+    line-height: 1.6;
+    width: 100%;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.mood-tip {
+    padding: 18px 20px;
+    border-left: 4px solid var(--accent-green);
+}
+
+.mood-tip h3 { font-size: 1rem; margin-bottom: 8px; }
+.mood-tip p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+.diary-log-section { padding: 20px; }
+.diary-log-section h3 { font-size: 1rem; margin-bottom: 14px; color: var(--text-main); }
+
+.diary-log-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+
+.diary-log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.log-mood { font-size: 1.4rem; }
+.log-date { color: var(--text-muted); font-size: 0.78rem; font-weight: 700; }
+.log-text { color: var(--text-main); margin-top: 2px; }
+
+.empty-hint { color: var(--text-light); font-size: 0.9rem; text-align: center; padding: 16px; }
+
+/* ============================================
+   Modal
+============================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal {
+    padding: 40px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-pet-img img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    animation: jump 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes jump {
+    0% { transform: scale(0.5) rotate(-10deg); }
+    60% { transform: scale(1.15) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.modal h2 { font-size: 1.6rem; color: var(--primary); }
+.modal p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
+
+.modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+/* ============================================
+   情緒圖表頁
+============================================ */
+.analytics-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.summary-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+}
+
+.summary-icon { font-size: 2.2rem; }
+
+.summary-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.summary-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 700; }
+
+.chart-section { padding: 28px; }
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.chart-header h2 { margin: 0; border: none; }
+
+.chart-controls { display: flex; gap: 6px; }
+
+.chart-tab {
+    padding: 6px 16px;
+    border: 1.5px solid rgba(108, 92, 231, 0.2);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.chart-tab:hover { border-color: var(--primary); color: var(--primary); }
+
+.chart-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.chart-wrap { width: 100%; height: 280px; }
+
+.analytics-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 24px;
+}
+
+.pie-wrap { width: 100%; height: 260px; }
+
+.history-list-section { padding: 28px; max-height: 380px; overflow: hidden; display: flex; flex-direction: column; }
+
+.history-list {
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    padding-right: 4px;
+}
+
+.history-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.history-mood { font-size: 2rem; flex-shrink: 0; }
+
+.history-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+.history-date strong { color: var(--primary); }
+
+.history-text { font-size: 0.9rem; color: var(--text-main); margin-top: 3px; }
+
+.history-photo {
+    width: 100%;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+}
+
+/* ============================================
+   Footer
+============================================ */
+.app-footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* ============================================
+   Animations
+============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RWD — 響應式設計
+============================================ */
+@media (max-width: 900px) {
+    .hero-section { grid-template-columns: 1fr; text-align: center; }
+    .hero-pet { order: -1; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .analytics-summary { grid-template-columns: repeat(2, 1fr); }
+    .diary-layout { grid-template-columns: 1fr; }
+    .analytics-bottom { grid-template-columns: 1fr; }
+    .navbar { padding: 0 16px; }
+    .nav-group-badge { display: none; }
+}
+
+@media (max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .analytics-summary { grid-template-columns: 1fr; }
+    .hero-text h1 { font-size: 2rem; }
+    .mood-selector { grid-template-columns: repeat(2, 1fr); }
+}
