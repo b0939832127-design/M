@@ -43,7 +43,7 @@
         <!-- 寵物數值面板 -->
         <section class="stats-section">
             <div class="stats-header">
-                <h2>🌟 小布丁的成長狀態</h2>
+                <h2>🌟 <span id="petName">小布丁</span>的成長狀態 <button id="editPetNameBtn" class="edit-name-btn" title="修改寵物名字">✏️</button></h2>
                 <span class="pet-name-tag" id="petNameTag">等級 <span id="petLevel">1</span></span>
             </div>
             <div class="stats-grid">
@@ -100,6 +100,36 @@
             </div>
         </section>
 
+        <!-- 寵物聊天對話區 -->
+        <section class="chat-section glass-card">
+            <div class="chat-header">
+                <h2>💬 與 <span id="chatPetName">小布丁</span> 聊天</h2>
+                <button id="apiKeyToggleBtn" class="api-key-toggle-btn">🔑 設定 Groq 金鑰</button>
+            </div>
+            
+            <!-- API Key 摺疊設定欄 -->
+            <div id="apiKeyPanel" class="api-key-panel hidden">
+                <label for="apiKeyInput">輸入您的 Groq API Key (僅存在您的瀏覽器本地):</label>
+                <div class="api-key-input-group">
+                    <input type="password" id="apiKeyInput" placeholder="gsk_..." />
+                    <button id="saveApiKeyBtn" class="api-key-save-btn">儲存金鑰</button>
+                </div>
+            </div>
+
+            <!-- 聊天訊息視窗 -->
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-msg bot" id="chatInitialMsg">
+                    嗨！我是你的小寵物，今天想跟我聊點什麼呢？🐾
+                </div>
+            </div>
+
+            <!-- 發送輸入區 -->
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="輸入訊息..." disabled />
+                <button id="sendChatBtn" class="chat-send-btn" disabled>🐾 傳送</button>
+            </div>
+        </section>
+
     </div>
 
     <footer class="app-footer">
@@ -107,11 +137,13 @@
     </footer>
 
     <script src="db.js"></script>
+    <script src="ai-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const db = PetDB.load();
 
             // 更新寵物數值 UI
+            document.getElementById('petName').textContent = db.pet.name || '小布丁';
             document.getElementById('petLevel').textContent = db.pet.level;
             document.getElementById('petNameTag').innerHTML = `等級 <span id="petLevel">${db.pet.level}</span>`;
             document.getElementById('expBar').style.width = db.pet.exp + '%';
@@ -120,6 +152,32 @@
             document.getElementById('intimacyValue').textContent = `${db.pet.intimacy} / 100`;
             document.getElementById('streakCount').textContent = db.pet.streak;
             document.getElementById('diaryCount').textContent = db.diaries.length;
+
+            // 編輯名字事件
+            document.getElementById('editPetNameBtn').addEventListener('click', () => {
+                const currentName = db.pet.name || '小布丁';
+                const newName = prompt('替你的小寵物取個新名字吧：', currentName);
+                if (newName !== null) {
+                    const trimmedName = newName.trim();
+                    if (trimmedName === '') {
+                        alert('名字不能為空喔！');
+                        return;
+                    }
+                    if (trimmedName.length > 10) {
+                        alert('名字最長只能 10 個字喔！');
+                        return;
+                    }
+                    db.pet.name = trimmedName;
+                    PetDB.save(db);
+                    document.getElementById('petName').textContent = trimmedName;
+                    
+                    // 同步更新 img 的 alt 屬性以維持網頁資訊一致
+                    const petImg = document.getElementById('heroPetImage');
+                    if (petImg) {
+                        petImg.alt = `虛擬寵物${trimmedName}`;
+                    }
+                }
+            });
 
             // 動態語言泡泡
             const moodMessages = {
@@ -147,6 +205,170 @@
                     </div>
                 `).join('');
             }
+
+            // ============ 🐾 AI 寵物聊天邏輯 ============
+            const petName = db.pet.name || '小布丁';
+            const chatPetNameEl = document.getElementById('chatPetName');
+            if (chatPetNameEl) chatPetNameEl.textContent = petName;
+
+            const chatContainer = document.getElementById('chatContainer');
+            const chatInitialMsg = document.getElementById('chatInitialMsg');
+            const chatInput = document.getElementById('chatInput');
+            const sendChatBtn = document.getElementById('sendChatBtn');
+            const apiKeyToggleBtn = document.getElementById('apiKeyToggleBtn');
+            const apiKeyPanel = document.getElementById('apiKeyPanel');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+
+            // 對話短期記憶歷史
+            let chatHistory = [];
+
+            // 載入 API Key
+            let apiKey = localStorage.getItem('groq_api_key') || '';
+            if (apiKey) {
+                apiKeyInput.value = apiKey;
+                enableChat(true);
+                chatInitialMsg.textContent = `嗨！我是你的小寵物 ${petName}，很高興見到你！今天想跟我聊點什麼呢？🐾`;
+            } else {
+                enableChat(false);
+                chatInitialMsg.innerHTML = `🐾 哈囉！我是你的虛擬寵物 ${petName}。<br><br><strong>系統提示</strong>：目前尚未設定 Groq API 金鑰，請點擊上方<strong>「🔑 設定 Groq 金鑰」</strong>按鈕輸入您的 API Key 以開啟即時聊天功能！`;
+            }
+
+            // 切換金鑰設定欄顯示
+            apiKeyToggleBtn.addEventListener('click', () => {
+                apiKeyPanel.classList.toggle('hidden');
+            });
+
+            // 儲存金鑰
+            saveApiKeyBtn.addEventListener('click', () => {
+                const keyVal = apiKeyInput.value.trim();
+                if (keyVal) {
+                    localStorage.setItem('groq_api_key', keyVal);
+                    apiKey = keyVal;
+                    apiKeyPanel.classList.add('hidden');
+                    enableChat(true);
+                    chatInitialMsg.textContent = `太棒了！金鑰儲存成功！我是你的小寵物 ${petName}，現在我們可以開始聊天囉！💖`;
+                    clearSystemMessages();
+                } else {
+                    localStorage.removeItem('groq_api_key');
+                    apiKey = '';
+                    enableChat(false);
+                    chatInitialMsg.innerHTML = `🐾 虛擬寵物 ${petName} 等待你的金鑰中。<br><br><strong>系統提示</strong>：請填入有效的 Groq API 金鑰。`;
+                }
+            });
+
+            function enableChat(enabled) {
+                chatInput.disabled = !enabled;
+                sendChatBtn.disabled = !enabled;
+                if (enabled) {
+                    chatInput.placeholder = "對寵物說些話吧...";
+                } else {
+                    chatInput.placeholder = "請先設定 Groq API 金鑰...";
+                }
+            }
+
+            function clearSystemMessages() {
+                const sysMsgs = chatContainer.querySelectorAll('.chat-msg.system');
+                sysMsgs.forEach(el => el.remove());
+            }
+
+            // 發送訊息邏輯
+            async function handleSendMessage() {
+                const text = chatInput.value.trim();
+                if (!text || chatInput.disabled) return;
+
+                // 1. 渲染使用者訊息
+                appendMessage('user', text);
+                chatInput.value = '';
+
+                // 2. 存入記憶 (最多保留最近 3 輪/6 條訊息)
+                chatHistory.push({ role: 'user', content: text });
+                if (chatHistory.length > 6) {
+                    chatHistory = chatHistory.slice(-6);
+                }
+
+                // 3. 顯示打字中動畫
+                const typingEl = showTypingIndicator();
+                scrollToBottom();
+
+                try {
+                    // 4. 組裝 API 請求
+                    const currentDb = PetDB.load(); // 讀取最新狀態（可能名字剛改過）
+                    const currentPetName = currentDb.pet.name || '小布丁';
+                    const lastDiaryEntry = currentDb.diaries[currentDb.diaries.length - 1];
+                    const systemPrompt = AIConfig.getSystemPrompt(currentPetName, currentDb.pet, lastDiaryEntry ? lastDiaryEntry.mood : null);
+                    
+                    const messages = [
+                        { role: 'system', content: systemPrompt },
+                        ...chatHistory
+                    ];
+
+                    // 5. 調用 Groq API
+                    const result = await AIConfig.sendToGroq(messages, apiKey);
+                    const reply = result.choices?.[0]?.message?.content || `(搖搖頭，沒有說話) 🐾`;
+
+                    // 6. 移除打字中動畫並渲染回覆
+                    typingEl.remove();
+                    appendMessage('bot', reply);
+                    
+                    // 7. 將回覆存入記憶
+                    chatHistory.push({ role: 'assistant', content: reply });
+                } catch (error) {
+                    console.error('Groq API Error:', error);
+                    typingEl.remove();
+                    appendMessage('system', `❌ 連線失敗：${error.message}。請確認您的 API 金鑰是否正確或網路是否暢通。`);
+                }
+                scrollToBottom();
+            }
+
+            function appendMessage(role, text) {
+                const msgEl = document.createElement('div');
+                msgEl.className = `chat-msg ${role}`;
+                msgEl.style.whiteSpace = 'pre-wrap';
+                msgEl.textContent = text;
+                chatContainer.appendChild(msgEl);
+            }
+
+            function showTypingIndicator() {
+                const indicator = document.createElement('div');
+                indicator.className = 'typing-indicator';
+                indicator.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                chatContainer.appendChild(indicator);
+                return indicator;
+            }
+
+            function scrollToBottom() {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // 事件監聽
+            sendChatBtn.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            });
+
+            // 監聽修改寵物名字的額外邏輯
+            document.getElementById('editPetNameBtn').addEventListener('click', () => {
+                setTimeout(() => {
+                    const updatedDb = PetDB.load();
+                    const updatedName = updatedDb.pet.name || '小布丁';
+                    const nameSpan = document.getElementById('chatPetName');
+                    if (nameSpan) nameSpan.textContent = updatedName;
+                    
+                    const apiKeySaved = localStorage.getItem('groq_api_key');
+                    if (!apiKeySaved && chatInitialMsg) {
+                        chatInitialMsg.innerHTML = `🐾 哈囉！我是你的虛擬寵物 ${updatedName}。<br><br><strong>系統提示</strong>：目前尚未設定 Groq API 金鑰，請點擊上方<strong>「🔑 設定 Groq 金鑰」</strong>按鈕輸入您的 API Key 以開啟即時聊天功能！`;
+                    } else if (apiKeySaved && chatInitialMsg.textContent.startsWith('嗨！') || chatInitialMsg.textContent.startsWith('太棒了！')) {
+                        chatInitialMsg.textContent = `嗨！我是你的小寵物 ${updatedName}，很高興見到你！今天想跟我聊點什麼呢？🐾`;
+                    }
+                }, 100);
+            });
         });
     </script>
 </body>

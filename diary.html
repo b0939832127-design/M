@@ -118,6 +118,17 @@
     <script src="db.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const db = PetDB.load();
+            const petName = db.pet.name || '小布丁';
+
+            // 動態更新寵物名字相關 UI
+            document.getElementById('diaryText').placeholder = `今天發生了什麼事呢？開心的、難過的都可以說給${petName}聽...`;
+            const feedbackPet = document.getElementById('feedbackPet');
+            if (feedbackPet) feedbackPet.alt = petName;
+            const modalPet = document.getElementById('modal-pet');
+            if (modalPet) modalPet.alt = petName;
+            document.getElementById('modalMsg').textContent = `${petName}收到你的心情了！`;
+
             // 顯示日期
             const today = new Date();
             document.getElementById('currentDate').textContent = today.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
@@ -127,9 +138,9 @@
             let photoDataUrl = null;
 
             const MOOD_TIPS = {
-                '喜': { title: '✨ 開心的一天！', content: '把這份開心也分享給身邊的人吧！小布丁看到你這麼開心，親密度大幅提升了喔！' },
+                '喜': { title: '✨ 開心的一天！', content: `把這份開心也分享給身邊的人吧！${petName}看到你這麼開心，親密度大幅提升了喔！` },
                 '樂': { title: '😆 歡樂無限！', content: '快樂的情緒最有感染力！記錄下這份快樂的原因，下次心情低落時再回來看看。' },
-                '怒': { title: '😤 深呼吸一下', content: '生氣是正常的情緒。試著想想：這件事 10 年後還重要嗎？小布丁陪著你。' },
+                '怒': { title: '😤 深呼吸一下', content: `生氣是正常的情緒。試著想想：這件事 10 年後還重要嗎？${petName}陪著你。` },
                 '哀': { title: '🥺 難過沒關係', content: '每個人都有低潮，允許自己悲傷。把心事寫下來，是療癒的第一步。' },
             };
 
@@ -238,17 +249,18 @@
                     db.pet.exp -= 100;
                     levelUp = true;
                 }
-                db.pet.streak += 1;
 
+                // 經驗值與等級更新後，PetDB.save(db) 將會自動計算正確的連續紀錄天數 (Streak)
                 PetDB.save(db);
                 renderDiaryLog();
 
                 // Modal
                 const modal = document.getElementById('successModal');
+                const name = db.pet.name || '小布丁';
                 const msg = levelUp
-                    ? `🎊 而且小布丁升到 Lv.${db.pet.level} 了！！`
+                    ? `🎊 而且${name}升到 Lv.${db.pet.level} 了！！`
                     : `親密度增加到 ${db.pet.intimacy}/100！`;
-                document.getElementById('modalMsg').textContent = `小布丁收到你的心情了！${msg}`;
+                document.getElementById('modalMsg').textContent = `${name}收到你的心情了！${msg}`;
                 modal.style.display = 'flex';
 
                 // 重置表單
